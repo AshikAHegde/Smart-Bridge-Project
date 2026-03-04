@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypertension Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Hypertension Prediction</h1>
+        
+        <form action="/predict" method="POST">
+            <div>
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" required>
+            </div>
+            
+            <div>
+                <label for="bmi">BMI:</label>
+                <input type="number" step="0.01" id="bmi" name="bmi" required>
+            </div>
+            
+            <div>
+                <label for="heart_rate">Heart Rate:</label>
+                <input type="number" id="heart_rate" name="heart_rate" required>
+            </div>
+            
+            <div>
+                <label for="glucose">Glucose Level:</label>
+                <input type="number" step="0.01" id="glucose" name="glucose" required>
+            </div>
+            
+            <input type="submit" value="Predict">
+        </form>
+        
+        {% if prediction %}
+        <div class="result">
+            <h2>Prediction Result:</h2>
+            <p>{{ prediction }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
