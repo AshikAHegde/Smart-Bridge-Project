@@ -3,41 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hypertension Prediction</title>
+    <title>Hypertension Detection - AI Powered Cardiovascular Risk Assessment</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .blood-pressure-guide {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .blood-pressure-guide h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .bp-range {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+        
+        .bp-range:last-child {
+            border-bottom: none;
+        }
+        
+        .bp-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .result-container {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .result-box {
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .result-box.green {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-left: 5px solid #27ae60;
+        }
+        
+        .result-box.orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border-left: 5px solid #e67e22;
+        }
+        
+        .result-box.red {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .result-box.darkred {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-left: 5px solid #c0392b;
+        }
+        
+        .result-text {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .confidence {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .recommendations {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .recommendations h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .recommendations li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #333;
+        }
+        
+        .recommendations li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 5px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Hypertension Prediction</h1>
+        <div class="header">
+            <h1>🏥 Hypertension Detection</h1>
+            <p>Advanced AI-Powered Cardiovascular Risk Assessment Platform</p>
+        </div>
         
-        <form action="/predict" method="POST">
-            <div>
-                <label for="age">Age:</label>
-                <input type="number" id="age" name="age" required>
+        <div class="main-content">
+            <div class="form-section">
+                <h2>Comprehensive Health Assessment</h2>
+                <p style="color: #666; margin-bottom: 20px;">Complete our evidence-based questionnaire for personalized hypertension risk evaluation and clinical recommendations</p>
+                
+                <form action="/predict" method="POST">
+                    <!-- Demographics Section -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin: 20px 0 15px 0;">Demographics</h3>
+                        <div class="form-row">
+                            <div>
+                                <label>Gender</label>
+                                <select name="Gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Age Group</label>
+                                <select name="Age" required>
+                                    <option value="">Select Age Range</option>
+                                    <option value="1">10-20 years</option>
+                                    <option value="2">20-30 years</option>
+                                    <option value="3">30-40 years</option>
+                                    <option value="4">40-50 years</option>
+                                    <option value="5">50+ years</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Medical History Section -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin: 20px 0 15px 0;">Medical History</h3>
+                        <div class="form-row">
+                            <div>
+                                <label>Family History of Hypertension</label>
+                                <select name="History" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Currently Under Medical Care</label>
+                                <select name="Patient" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Symptoms Assessment -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin: 20px 0 15px 0;">Symptoms Assessment</h3>
+                        <div class="form-row">
+                            <div>
+                                <label>Breath Shortness</label>
+                                <select name="BreathShortness" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Visual Changes</label>
+                                <select name="VisualChanges" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Frequent Nosebleeds</label>
+                                <select name="NoseBleeding" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Currently Taking BP Medication</label>
+                                <select name="TakeMedication" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clinical Readings -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin: 20px 0 15px 0;">Blood Pressure Readings</h3>
+                        <div class="form-row">
+                            <div>
+                                <label>Systolic Pressure (mm Hg)</label>
+                                <input type="number" name="Systolic" placeholder="e.g., 120" required>
+                            </div>
+                            <div>
+                                <label>Diastolic Pressure (mm Hg)</label>
+                                <input type="number" name="Diastolic" placeholder="e.g., 80" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lifestyle Section -->
+                    <div class="form-group">
+                        <h3 style="color: #667eea; margin: 20px 0 15px 0;">Lifestyle Factors</h3>
+                        <div class="form-row">
+                            <div>
+                                <label>Severity of Current Issues</label>
+                                <select name="Severity" required>
+                                    <option value="">Select Severity</option>
+                                    <option value="Mild">Mild</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Severe">Severe</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Heart-Healthy Diet</label>
+                                <select name="ControlledDiet" required>
+                                    <option value="">Select Option</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Time Since Diagnosis</label>
+                                <select name="Whendiagnosed" required>
+                                    <option value="">Select Time Period</option>
+                                    <option value="1">Less than 1 Year</option>
+                                    <option value="2">1-2 Years</option>
+                                    <option value="3">2-5 Years</option>
+                                    <option value="4">5+ Years</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">🔍 GENERATE RISK ASSESSMENT</button>
+                </form>
+                
+                {% if error %}
+                <div class="error">{{ error }}</div>
+                {% endif %}
             </div>
             
-            <div>
-                <label for="bmi">BMI:</label>
-                <input type="number" step="0.01" id="bmi" name="bmi" required>
+            <!-- Sidebar with Blood Pressure Guidelines -->
+            <div class="sidebar">
+                <h3>About This System</h3>
+                <p style="color: #666; margin-bottom: 15px; line-height: 1.6;">Our AI-powered platform analyzes multiple cardiovascular risk factors using advanced machine learning algorithms trained on clinical data.</p>
+                
+                <ul style="color: #666; margin-left: 20px; line-height: 2;">
+                    <li>Evidence-based risk assessment</li>
+                    <li>Clinical guideline compliance</li>
+                    <li>Personalized recommendations</li>
+                    <li>Professional medical support</li>
+                </ul>
+                
+                <div class="blood-pressure-guide">
+                    <h3>Blood Pressure Guidelines</h3>
+                    <div class="bp-range">
+                        <span class="bp-label">Normal</span>
+                        <span>&lt;120/80</span>
+                    </div>
+                    <div class="bp-range">
+                        <span class="bp-label">Elevated</span>
+                        <span>120-129/&lt;80</span>
+                    </div>
+                    <div class="bp-range">
+                        <span class="bp-label">Stage 1</span>
+                        <span>130-139/80-89</span>
+                    </div>
+                    <div class="bp-range">
+                        <span class="bp-label">Stage 2</span>
+                        <span>≥140/≥90</span>
+                    </div>
+                    <div class="bp-range">
+                        <span class="bp-label">Crisis</span>
+                        <span>&gt;180/≥120</span>
+                    </div>
+                </div>
             </div>
-            
-            <div>
-                <label for="heart_rate">Heart Rate:</label>
-                <input type="number" id="heart_rate" name="heart_rate" required>
-            </div>
-            
-            <div>
-                <label for="glucose">Glucose Level:</label>
-                <input type="number" step="0.01" id="glucose" name="glucose" required>
-            </div>
-            
-            <input type="submit" value="Predict">
-        </form>
+        </div>
         
-        {% if prediction %}
-        <div class="result">
-            <h2>Prediction Result:</h2>
-            <p>{{ prediction }}</p>
+        <!-- Results Section - Appears after form submission -->
+        {% if prediction_text %}
+        <div class="result-container" style="margin-top: 30px;">
+            <h2 style="text-align: center; margin-bottom: 20px;">Risk Assessment Results</h2>
+            <div class="result-box {{ result_color }}">
+                <div class="result-text">{{ prediction_text }}</div>
+                <div class="confidence">Confidence Score: {{ confidence }}%</div>
+            </div>
+            
+            {% if recommendation %}
+            <div class="recommendations">
+                <h3>Clinical Recommendations</h3>
+                <ul>
+                    {% for rec in recommendation %}
+                    <li>{{ rec }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if error %}
+        <div style="margin-top: 30px;">
+            <div class="error" style="font-size: 1.1em;">{{ error }}</div>
         </div>
         {% endif %}
     </div>
